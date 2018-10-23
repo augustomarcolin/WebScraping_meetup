@@ -1,0 +1,99 @@
+require(rvest)
+require(RSelenium)
+require(httr)
+require(dplyr)
+require(stringr)
+
+
+download_pt_rs <- function (dir = NULL, year, month)
+{
+  data <- sprintf("%.2d/%s", month, year)
+  
+  if (is.null(dir))
+  {
+    dir <- file.path(getwd(), 'poa')
+    dir.create(dir)
+  } else{
+    dir <- file.path(dir, 'poa')
+    dir.create(dir)
+  }
+  
+  #---- Seting preferences in google chrome
+  
+  eCaps <- list(args = list('window-size=1280,600',
+                            'disable-infobars',
+                            'enable-precise-memory-info'),
+                prefs = list("profile.default_content_settings.popups" = 0L,
+                             "download.prompt_for_download" = FALSE,
+                             "download.default_directory" = dir,
+                             "download.directory_upgrade" = T))
+  #---- Open 
+  
+  driver  <- rsDriver(browser = c('chrome'), extraCapabilities = eCaps)
+  
+  remDr <- driver[['client']]
+  
+  remDr$navigate("http://portaltransparencia.procempa.com.br/portalTransparencia/fpRemuneracaoPesquisa.do")
+  
+  #---- select month
+  
+  scrap_month <- read_html(remDr$getPageSource()[[1]]) %>%
+    xml_node(xpath = '//*[@id="idStrutsFormName"]/center/table/tbody/tr[2]/td/table/tbody/tr/td/table/tbody/tr[4]/td[2]/select') %>%
+    xml_text() 
+  
+  months <- regmatches(scrap_month, gregexpr(".{7}", scrap_month))[[1]]
+  
+  xpath_month <- sprintf('//*[@id="idStrutsFormName"]/center/table/tbody/tr[2]/td/table/tbody/tr/td/table/tbody/tr[4]/td[2]/select/option[%s]', 
+                         which(months == data))
+  
+  month_selector2 <- remDr$findElement(using = 'xpath', xpath_month)
+  
+  month_selector2$clickElement()
+  
+  
+  #---- click to search
+  search_button <- remDr$findElement(using = 'xpath', '//*[@id="idSearchBoxButton"]')
+  
+  search_button$clickElement()
+  
+  #---- click to download
+  
+  download_button <- remDr$findElement(using = 'xpath', '//*[@id="opener"]')
+  
+  download_button$clickElement()
+  
+  #---- choosen file type
+  
+  csv_download <- remDr$findElement(using = 'xpath', "//img[@alt='csv image']")
+  
+  csv_download$clickElement()
+  
+  Sys.sleep(20)
+  
+  #---- saving file
+  
+  default_dir <- file.path("", "Users", Sys.info()[["user"]], "Downloads")
+  
+  today <- Sys.Date()
+  
+  file_search <- sprintf(paste0("FpRemuneracao-", today))
+  
+  file_name <- list.files(default_dir)[stringr::str_detect(list.files(default_dir), file_search)]
+  
+  while(sum(str_detect(file_name, "crdownload")) != 0){
+    
+    cat("Waiting download\n")
+    
+    file_name <- list.files(default_dir)[stringr::str_detect(list.files(default_dir), file_search)]
+    
+    Sys.sleep(1)
+  }
+  
+  file_rename <- sprintf('poa_mun_%s_%s.csv', year, month)
+  
+  file.rename(file.path(default_dir, file_name), file.path(dir, file_rename))
+  
+}
+
+
+download_pt_rs(year = 2018, month = 1)

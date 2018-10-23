@@ -1,0 +1,104 @@
+require(rvest)
+require(RSelenium)
+require(httr)
+require(dplyr)
+
+
+download_pt_rs <- function (dir = NULL, year, month)
+{
+  
+  file_name <- sprintf('rs_exe_%s_%s_pt', year, month)
+  
+  if (is.null(dir))
+  {
+    dir <- file.path(getwd(), 'rs')
+    dir.create(dir)
+  } else{
+    dir <- file.path(dir, 'rs')
+    dir.create(dir)
+  }
+  
+   
+  
+  eCaps <- list(args = list('window-size=1280,600',
+                            'disable-infobars',
+                            'enable-precise-memory-info'),
+                prefs = list("profile.default_content_settings.popups" = 0L,
+                             "download.prompt_for_download" = FALSE,
+                             "download.default_directory" = dir,
+                             "download.directory_upgrade" = T))
+  
+  data <- sprintf("%.2d/%s", month, year)
+  
+  
+  driver  <- rsDriver(browser = c('chrome'), extraCapabilities = eCaps)
+  
+  remDr <- driver[['client']]
+  
+  remDr$navigate("http://antigo.transparencia.rs.gov.br/webpart/system/ConsultaDadosEngine.aspx?x=HMrorCkmBy2IqxMLfTkOb4JWhczaPoPVWvmjgoTccWYrW%2fjem8yKRmUblD5XA1p5ALK7eUVfYXt9isAV3FOJzBgGukeKupQcR%2byTash9r916Usb%2fxfbbrGwlmM%2fHCgUJ6incKIlGdb4zrYJJ3b3cKv61LBBvnetWyA2xjXxN%2fcjBzTdsun2XB8gPaM%2fn62eP3qrn7sq5K02Mve1%2bZLHfZdAi25sxg66zux%2fcuIFfJXuhmKDCuh%2bumQEP4WC2Psso9TLtlx85zbx6awRujx%2ftv9XV7skEOYUjrwFOVOQqb2PK39NNsj0KfXcH%2fKgcs2qYe0YsA5phkTXYkXvDFznP8YcypfEumirqX4thx6MwZch2KMgaMcyOXVvgQWgbp1bp%2blmGtN82lKWTstsnElpzNpLoEmKPUl1oimOUmwxVEu1eDpKsr5wB30jrLFUkKdvYYNXFbzE4QlTwzDJe0e8yL2IKMzOFNc6b4abDAf6Dyqg%3d")
+  
+  page <- remDr$findElement(using = 'xpath', '//*[@id="ctl00_ContentPlaceHolder_lblTotalPagina"]')
+  
+  page_number <- as.numeric(unlist(page$getElementText()))
+  
+  for(i in 1:page_number)
+  {
+    table_aux <- read_html(remDr$getPageSource()[[1]]) %>%
+      html_node(xpath = '//*[@id="ctl00_ContentPlaceHolder_grdDados"]') %>%
+      html_table()
+    
+    names(table_aux) <- c('periodo', 'qtd', 'ordenar', 'a', 'b')
+    
+    table_aux %<>%
+      select(periodo) %>%
+      mutate(page_num = i,
+             position_num = rownames(.))
+    
+    if(data %in% table_aux$periodo)
+    {
+      position <- table_aux %>%
+        filter(periodo == data) %>%
+        .$position_num %>%
+        as.numeric()
+      
+      data_xpath <- sprintf("//*[@id='ctl00_ContentPlaceHolder_grdDados_ctl%.2d']/td[1]", position+1)
+      
+      data_struct <- remDr$findElement(using = 'xpath', data_xpath)
+      data_struct$clickElement()
+      
+      download <- remDr$findElement(using = 'xpath', "//*[@id='ctl00_ContentPlaceHolder_lkbExportar']")
+      
+      download$clickElement()
+      
+      break
+    }
+    
+    next_page <- remDr$findElement(using = 'xpath', "//*[@id='ctl00_ContentPlaceHolder_lkbProxima']")
+    
+    next_page$clickElement() 
+    
+  }
+  
+  
+  default_dir <- file.path("", "Users", Sys.info()[["user"]], "Downloads")
+
+  today <- Sys.Date()
+  
+  file_search <- paste(lubridate::day(today), lubridate::month(today), lubridate::year(today), sep = '_')
+
+  file_name <- list.files(default_dir)[stringr::str_detect(list.files(default_dir), file_search)]
+  
+  file_rename <- sprintf('rs_exe_%s_%s.csv', year, month)
+  
+  file.rename(file.path(default_dir, file_name), file.path(dir, file_rename))
+  
+}
+
+
+dir <- 'data'
+
+month<- 5
+
+year <- 2018
+
+download_pt_rs(dir = dir, year = year, month = month)

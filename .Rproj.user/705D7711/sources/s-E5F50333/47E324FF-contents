@@ -1,0 +1,4 @@
+.remark-code, .remark-inline-code {
+    font-family: 'Source Code Pro', 'Lucida Console', Monaco, monospace;
+    color: #10100e !important;
+}

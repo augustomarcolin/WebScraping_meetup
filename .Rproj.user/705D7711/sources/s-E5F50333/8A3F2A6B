@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1539551633177.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "18|1|32|0|\n36|1|45|0|\n50|1|56|0|\n61|1|65|0|\n72|1|78|0|\n83|1|97|0|\n",
+    "hash" : "1110793133",
+    "id" : "8A3F2A6B",
+    "lastKnownWriteTime" : 1540169426,
+    "last_content_update" : 1540169426236,
+    "path" : "~/Augusto/meetup/amazon.R",
+    "project_path" : "amazon.R",
+    "properties" : {
+        "cursorPosition" : "96,3",
+        "scrollLine" : "67",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

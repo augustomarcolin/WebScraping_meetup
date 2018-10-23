@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Web scraping em R</title>
+    <meta charset="utf-8">
+    <meta name="author" content="   Augusto Marcolin" />
+    <link href="libs/remark-css/shinobi.css" rel="stylesheet" />
+    <link href="libs/remark-css/ninjutsu.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Web scraping em R
+## Rvest e RSelenium
+### <br><br> Augusto Marcolin
+### <br>24/10/2018
+
+---
+
+
+
+
+
+class: middle center bg-main1
+
+# **Quem sou eu?**
+
+---
+class: middle, center
+&lt;div align = "center"&gt;
+&lt;img src="images/about_me.png" height="100%" width="100%" /&gt;
+&lt;/div&gt;
+
+---
+
+class: middle center bg-main1
+
+# **WebScraping**
+
+
+### &lt;p style="margin-bottom:2cm; margin-top:2cm"&gt; Processo de extrair informações não estruturadas de websites.
+&lt;/p&gt;
+
+
+---
+class: middle, center
+&lt;div align = "center"&gt;
+&lt;img src="images/web_scraping.png" height="100%" width="100%" /&gt;
+&lt;/div&gt;
+
+
+
+---
+
+class: middle center bg-main1
+
+# **HTML**
+
+### **Hipertext Markup Language**
+
+
+---
+class: middle center bg-main1
+
+# **HTML**
+
+## &lt;p style="margin-bottom:2cm; margin-top:2cm"&gt; Linguagem para estruturar conteúdos para navegadores da web &lt;/p&gt;
+
+
+## &lt;p style="margin-bottom:2cm; margin-top:2cm"&gt; Baseada em marcações(tags)&lt;/p&gt;
+
+
+---
+
+
+```html
+&lt;!DOCTYPE html&gt;
+
+&lt;html lang="pt-br"&gt;
+&lt;head&gt;
+    &lt;meta charset="utf-8"&gt;
+    &lt;title&gt;Título da página&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+   &lt;h1&gt;Aqui vai o texto do título&lt;/h1&gt;
+   &lt;p&gt;Aqui vai o texto do parágrafo. 
+   Geralmente parágrafos tem muitas palavras, letras menores que as do título&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+```
+
+
+---
+
+# Tags Comuns
+
+* **html** 
+    - Todo conteúdo da página faz parte deste elemento;
+    
+* **head** 
+    - Contém os metadados do documento (Título, Scripts, etc);
+    
+* **title** 
+    - Título do documento (mostrado acima da página e quando é marcada como favorito);
+    
+* **body** 
+    - Tudo que não está no head deve ser incluído no body, se trata do conteúdo visível primário;
+    
+* **h1, h2, h3, h4** 
+    - Títulos em diferentes níveis para a página;
+    
+* **p** 
+    - *Um parágrafo*;
+    
+* **ul, ol, li** 
+    - lista não ordenada, lista ordenada e especificação de elementos da lista, respectivamente;
+
+.footer[&lt;font size = "2"&gt;Referência : Lucas Godoy&lt;/font&gt;]
+
+---
+
+class: middle center bg-main1
+
+# **WebScraping em R**
+
+---
+class: split-two white
+
+.column.bg-main1[.content[
+&lt;center&gt;  
+
+  # **Rvest**
+  
+  ###&lt;p style="margin-bottom:2cm; margin-top:2cm"&gt;Pacote para "raspar" os dados do HTML.&lt;/p&gt;
+  
+  ###&lt;p style="margin-bottom:2cm"&gt;Difícil navegar na página através dele.&lt;/p&gt;
+  
+  ###&lt;p style="margin-bottom:2cm;"&gt;Modo mais fácil de acesso as informações do HTML.&lt;/p&gt;
+
+&lt;/center&gt;
+
+]]
+.column.bg-main2[.content[
+&lt;center&gt;  
+# **RSelenium**
+  
+###&lt;p style="margin-bottom:2cm; margin-top:2cm"&gt; Interface R com o Selenium.&lt;/p&gt;
+
+###&lt;p style="margin-bottom:2cm"&gt; Utilizado na automatização de tarefas web.&lt;/p&gt;
+ 
+### Ideal para fazer a navegação de páginas web.
+&lt;/center&gt;
+]]bsites.
+
+---
+class: middle center bg-main1
+
+# **Rvest**
+
+---
+# Principais Funções
+
+* &lt;code&gt;read_html()&lt;/code&gt;
+
+Utilizada para ler o html, ou seja, é a função inicial para "parsear" o html em um objeto no R.
+
+* &lt;code&gt;html_nodes()&lt;/code&gt;
+
+Função utilizada para selecionar partes de um documento.
+
+* &lt;code&gt;html_text()&lt;/code&gt; 
+
+Utilizada para "raspar" o dado, ou seja, esta função é capaz de captar o texto de um "nodo".
+
+* &lt;code&gt;html_table()&lt;/code&gt;
+
+Função para "parsear" uma tag "table" em um data frame no R.
+---
+
+&lt;center&gt;
+&lt;img src="images/letras_mus.png" width="80%"&gt;
+&lt;/center&gt;
+
+---
+
+
+
+```r
+library(rvest)
+library(dplyr)
+
+
+url &lt;- 'https://www.letras.mus.br/'
+
+musicas &lt;- read_html(url) %&gt;%
+  html_nodes(".top-list_mus") %&gt;%
+  html_nodes("b") %&gt;%
+  html_text
+```
+
+
+```r
+musicas
+```
+
+```
+##  [1] "Girls Like You"                 "Notificação Preferida"         
+##  [3] "Shallow (feat. Bradley Cooper)" "Meu Abrigo"                    
+##  [5] "Sobre Nós (Poesia Acústica #2)" "Ousado Amor"                   
+##  [7] "O Bebê (part. MC Kekel)"        "Atrasadinha (part. Ferrugem)"  
+##  [9] "Ciumeira"                       "Lugar Secreto"
+```
+
+---
+
+
+```r
+artistas &lt;- read_html(url) %&gt;%
+  html_nodes(".top-list_mus") %&gt;%
+  html_nodes("span") %&gt;%
+  html_text()
+```
+
+
+```r
+artistas
+```
+
+```
+##  [1] "Maroon 5"            "Zé Neto e Cristiano" "Lady Gaga"          
+##  [4] "Melim"               "Pineapple"           "Isaías Saad"        
+##  [7] "Kevinho"             "Felipe Araújo"       "Marília Mendonça"   
+## [10] "Gabriela Rocha"
+```
+
+---
+
+
+```r
+df_mus &lt;- tibble::tibble(
+  musicas,
+  artistas
+)
+```
+
+
+```r
+df_mus
+```
+
+```
+## # A tibble: 10 x 2
+##    musicas                        artistas           
+##    &lt;chr&gt;                          &lt;chr&gt;              
+##  1 Girls Like You                 Maroon 5           
+##  2 Notificação Preferida          Zé Neto e Cristiano
+##  3 Shallow (feat. Bradley Cooper) Lady Gaga          
+##  4 Meu Abrigo                     Melim              
+##  5 Sobre Nós (Poesia Acústica #2) Pineapple          
+##  6 Ousado Amor                    Isaías Saad        
+##  7 O Bebê (part. MC Kekel)        Kevinho            
+##  8 Atrasadinha (part. Ferrugem)   Felipe Araújo      
+##  9 Ciumeira                       Marília Mendonça   
+## 10 Lugar Secreto                  Gabriela Rocha
+```
+
+---
+class: middle center bg-main1
+
+
+# **RSelenium**
+
+---
+
+
+```r
+library(RSelenium)
+
+# abrindo a conexão
+
+driver  &lt;- rsDriver(browser = c('chrome'))
+
+remDr &lt;- driver[['client']]
+
+remDr$navigate("https://trends.google.com.br/trends/?geo=BR")
+```
+
+&lt;center&gt;
+&lt;img src="images/rselenium_1.png" width="60%"&gt;
+&lt;/center&gt;
+---
+
+```r
+# pesquisando o termo e clicando enter 
+
+termo &lt;- "roger waters"
+
+search_box &lt;- remDr$findElement(using = 'xpath', '//*[@id="input-254"]')
+
+search_box$sendKeysToElement(list(termo, "\uE007"))
+  
+Sys.sleep(3)
+```
+
+
+&lt;center&gt;
+&lt;img src="images/rselenium_2.png" width="60%"&gt;
+&lt;/center&gt;
+---
+
+
+```r
+# clicando e baixando os dados
+
+download_button &lt;- remDr$findElement(using = 'xpath', '/html/body/div[2]/div[2]/div/md-content/div/div/div[1]/trends-widget/ng-include/widget/div/div/div/widget-actions/div/button[1]')
+
+download_button$clickElement()
+```
+
+
+&lt;center&gt;
+&lt;img src="images/rselenium_3.png" width="60%"&gt;
+&lt;/center&gt;
+
+---
+
+class: middle center bg-main1
+
+&lt;center&gt;
+&lt;img src="images/rselenium.gif" width="75%"&gt;
+&lt;/center&gt;
+
+
+---
+class: middle center bg-main1
+
+# **Exemplo**
+
+&lt;center&gt;
+&lt;img src="images/coder.gif" width="75%"&gt;
+&lt;/center&gt;
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"seal": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -1,0 +1,312 @@
+---
+title: "Web scraping em R"
+subtitle: "Rvest e RSelenium"
+author: "<br><br> Augusto Marcolin"
+date: "<br>24/10/2018"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: ["shinobi", "ninjutsu", "styles.css"]
+    self_contained: false
+    nature:
+      ratio: "16:9"
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      seal: false
+---
+
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library(magrittr)
+library(rvest)
+library(RSelenium)
+```
+
+class: middle center bg-main1
+
+# **Quem sou eu?**
+
+---
+class: middle, center
+<div align = "center">
+<img src="images/about_me.png" height="100%" width="100%" />
+</div>
+
+---
+
+class: middle center bg-main1
+
+# **WebScraping**
+
+
+### <p style="margin-bottom:2cm; margin-top:2cm"> Processo de extrair informações não estruturadas de websites.
+</p>
+
+
+---
+class: middle, center
+<div align = "center">
+<img src="images/web_scraping.png" height="100%" width="100%" />
+</div>
+
+
+
+---
+
+class: middle center bg-main1
+
+# **HTML**
+
+### **Hipertext Markup Language**
+
+
+---
+class: middle center bg-main1
+
+# **HTML**
+
+## <p style="margin-bottom:2cm; margin-top:2cm"> Linguagem para estruturar conteúdos para navegadores da web </p>
+
+
+## <p style="margin-bottom:2cm; margin-top:2cm"> Baseada em marcações(tags)</p>
+
+
+---
+
+```{html eval = F}
+<!DOCTYPE html>
+
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <title>Título da página</title>
+</head>
+<body>
+   <h1>Aqui vai o texto do título</h1>
+   <p>Aqui vai o texto do parágrafo. 
+   Geralmente parágrafos tem muitas palavras, letras menores que as do título</p>
+</body>
+</html>
+```
+
+
+---
+
+# Tags Comuns
+
+* **html** 
+    - Todo conteúdo da página faz parte deste elemento;
+    
+* **head** 
+    - Contém os metadados do documento (Título, Scripts, etc);
+    
+* **title** 
+    - Título do documento (mostrado acima da página e quando é marcada como favorito);
+    
+* **body** 
+    - Tudo que não está no head deve ser incluído no body, se trata do conteúdo visível primário;
+    
+* **h1, h2, h3, h4** 
+    - Títulos em diferentes níveis para a página;
+    
+* **p** 
+    - *Um parágrafo*;
+    
+* **ul, ol, li** 
+    - lista não ordenada, lista ordenada e especificação de elementos da lista, respectivamente;
+
+.footer[<font size = "2">Referência : Lucas Godoy</font>]
+
+---
+
+class: middle center bg-main1
+
+# **WebScraping em R**
+
+---
+class: split-two white
+
+.column.bg-main1[.content[
+<center>  
+
+  # **Rvest**
+  
+  ###<p style="margin-bottom:2cm; margin-top:2cm">Pacote para "raspar" os dados do HTML.</p>
+  
+  ###<p style="margin-bottom:2cm">Difícil navegar na página através dele.</p>
+  
+  ###<p style="margin-bottom:2cm;">Modo mais fácil de acesso as informações do HTML.</p>
+
+</center>
+
+]]
+.column.bg-main2[.content[
+<center>  
+# **RSelenium**
+  
+###<p style="margin-bottom:2cm; margin-top:2cm"> Interface R com o Selenium.</p>
+
+###<p style="margin-bottom:2cm"> Utilizado na automatização de tarefas web.</p>
+ 
+### Ideal para fazer a navegação de páginas web.
+</center>
+]]bsites.
+
+---
+class: middle center bg-main1
+
+# **Rvest**
+
+---
+# Principais Funções
+
+* <code>read_html()</code>
+
+Utilizada para ler o html, ou seja, é a função inicial para "parsear" o html em um objeto no R.
+
+* <code>html_nodes()</code>
+
+Função utilizada para selecionar partes de um documento.
+
+* <code>html_text()</code> 
+
+Utilizada para "raspar" o dado, ou seja, esta função é capaz de captar o texto de um "nodo".
+
+* <code>html_table()</code>
+
+Função para "parsear" uma tag "table" em um data frame no R.
+---
+
+<center>
+<img src="images/letras_mus.png" width="80%">
+</center>
+
+---
+
+
+```{r, message = F}
+library(rvest)
+library(dplyr)
+
+
+url <- 'https://www.letras.mus.br/'
+
+musicas <- read_html(url) %>%
+  html_nodes(".top-list_mus") %>%
+  html_nodes("b") %>%
+  html_text
+
+
+```
+
+```{r}
+musicas
+```
+
+---
+
+```{r}
+artistas <- read_html(url) %>%
+  html_nodes(".top-list_mus") %>%
+  html_nodes("span") %>%
+  html_text()
+
+```
+
+```{r}
+artistas
+```
+
+---
+
+```{r}
+
+df_mus <- tibble::tibble(
+  musicas,
+  artistas
+)
+
+```
+
+```{r}
+df_mus
+```
+
+---
+class: middle center bg-main1
+
+
+# **RSelenium**
+
+---
+
+```{r eval = F}
+library(RSelenium)
+
+# abrindo a conexão
+
+driver  <- rsDriver(browser = c('chrome'))
+
+remDr <- driver[['client']]
+
+remDr$navigate("https://trends.google.com.br/trends/?geo=BR")
+
+```
+
+<center>
+<img src="images/rselenium_1.png" width="60%">
+</center>
+---
+```{r eval = F}
+# pesquisando o termo e clicando enter 
+
+termo <- "roger waters"
+
+search_box <- remDr$findElement(using = 'xpath', '//*[@id="input-254"]')
+
+search_box$sendKeysToElement(list(termo, "\uE007"))
+  
+Sys.sleep(3)
+
+```
+
+
+<center>
+<img src="images/rselenium_2.png" width="60%">
+</center>
+---
+
+```{r, eval = F}
+# clicando e baixando os dados
+
+download_button <- remDr$findElement(using = 'xpath', '/html/body/div[2]/div[2]/div/md-content/div/div/div[1]/trends-widget/ng-include/widget/div/div/div/widget-actions/div/button[1]')
+
+download_button$clickElement()
+
+```
+
+
+<center>
+<img src="images/rselenium_3.png" width="60%">
+</center>
+
+---
+
+class: middle center bg-main1
+
+<center>
+<img src="images/rselenium.gif" width="75%">
+</center>
+
+
+---
+class: middle center bg-main1
+
+# **Exemplo**
+
+<center>
+<img src="images/coder.gif" width="75%">
+</center>
+

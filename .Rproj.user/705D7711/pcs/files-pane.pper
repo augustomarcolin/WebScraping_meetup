@@ -1,0 +1,9 @@
+{
+    "path" : "~/Augusto/meetup",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}

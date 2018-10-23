@@ -1,0 +1,18 @@
+library(rvest)
+library(dplyr)
+
+
+url <- 'https://www.letras.mus.br/'
+
+musicas <- read_html(url) %>%
+  html_nodes(".top-list_mus") %>%
+  html_nodes("b") %>%
+  html_text()
+
+
+
+artistas <- read_html(url) %>%
+  html_nodes(".top-list_mus") %>%
+  html_nodes("span") %>%
+  html_text()
+  
